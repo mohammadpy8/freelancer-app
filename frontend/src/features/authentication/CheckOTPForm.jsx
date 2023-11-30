@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { HiArrowCircleRight } from "react-icons/hi";
 import { CiEdit } from "react-icons/ci";
+import Loading from "../../interface/Loading";
 
 const RESEND_OTP_CODE_TIME = 90;
 
@@ -25,21 +26,24 @@ function CheckOTPForm({ phoneNumber, onBack, onResendOTP, otpResponse }) {
     try {
       const { message, user } = await mutateAsync({ phoneNumber, otp });
       toast.success(message);
-      if (user.isActive) {
-        if (user.role === "OWNER") return navigate("/owner");
-        if (user.role === "FREELANCER") return navigate("/freelancer");
-      } else {
-        navigate("/complet-profile");
+      if (!user.isActive) return navigate("/complet-profile");
+      if (user.status !== 2) {
+        navigate("/");
+        toast.error("پروفایل شما در انتظار در تایید است");
+        return;
       }
+      if (user.role === "OWNER") return navigate("/owner");
+      if (user.role === "FREELANCER") return navigate("/freelancer");
     } catch (error) {
       toast.error(error?.response?.data?.message);
       setErrorOTP(true);
     }
   };
+
   const borderOTP = (value) => {
     if (value && otp.length === numberInputOTP) {
       return "2px solid red";
-    } else {
+    } else if (otp.length <= numberInputOTP) {
       return "2px solid rgb(var(--color-primary-400))";
     }
   };
@@ -49,16 +53,22 @@ function CheckOTPForm({ phoneNumber, onBack, onResendOTP, otpResponse }) {
       if (timer) clearInterval(timer);
     };
   }, [time]);
+
+  useEffect(() => {
+    if (otp.length < numberInputOTP) setErrorOTP(false);
+  }, [otp]);
+
   return (
     <div>
       <button onClick={onBack}>
         <HiArrowCircleRight size={25} className="text-secondary-600" />
       </button>
+      {}
       {otpResponse && (
         <p className="flex items-center gap-x-2 my-4">
           <span>{otpResponse?.message}</span>
           <button onClick={onBack}>
-            <CiEdit className="w-8 h-7 text-primary-900 text-bold"/>
+            <CiEdit className="w-8 h-7 text-primary-900 text-bold" />
           </button>
         </p>
       )}
@@ -89,7 +99,15 @@ function CheckOTPForm({ phoneNumber, onBack, onResendOTP, otpResponse }) {
             }}
           />
         </div>
-        <button className="btn btn--primary w-full">اعتبار سنجی کد</button>
+        <div>
+          {isPending ? (
+            <Loading />
+          ) : (
+            <button type="submit" className="btn btn--primary w-full">
+              تایید
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

@@ -8,4 +8,8 @@ function checkOTP(data) {
   return http.post("/user/check-otp", data).then((data) => data.data);
 }
 
-export { getOTP, checkOTP };
+function completeProfile(data) {
+  return http.post("/user/complete-profile", data).then((data) => data.data);
+}
+
+export { getOTP, checkOTP, completeProfile };

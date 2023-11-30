@@ -56,6 +56,10 @@
     @apply bg-secondary-500 text-secondary-100;
   }
 
+  .radio-btn {
+    @apply cursor-pointer w-4 h-4 form-radio text-primary-700 focus:ring-primary-700
+  }
+
   .btn--secondary {
     @apply;
   }
